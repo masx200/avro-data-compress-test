@@ -1,0 +1,9 @@
+{
+    "fmt": {
+        "indentWidth": 4,
+        "singleQuote": false
+    },
+    "imports": {
+        "@std/io": "jsr:@std/io@^0.225.0"
+    }
+}
