@@ -11,9 +11,9 @@ export const MessageSchema = {
     "fields": [{
         "type": "string",
         "name": "sha512",
-    }, {
-        "name": "haveAvroData",
-        "type": "int",
+        // }, {
+        //     "name": "haveAvroData",
+        //     "type": "int",
     }, {
         "name": "dictionary",
         "type": {

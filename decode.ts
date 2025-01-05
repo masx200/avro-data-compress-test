@@ -6,12 +6,12 @@ import { bufferToUint8Array } from "./bufferToUint8Array.ts";
 import { EncodedDecodeMessageType } from "./EncodedDecodeMessageType.ts";
 import { parseEncodedMessageSchema } from "./parseEncodedMessageSchema.ts";
 
+import { calculateSHA512 } from "./calculateSHA512.ts";
+import { EncodedMessageAvro } from "./EncodedMessageAvro.ts";
 import {
     EncodedArrayOfMessageAvro,
     parseArrayOfMessageSchema,
 } from "./parseArrayOfMessageSchema.ts";
-import { calculateSHA512 } from "./calculateSHA512.ts";
-import { EncodedMessageAvro } from "./EncodedMessageAvro.ts";
 export async function decodeAvroToEncodedArrayOfMessages(
     data: Uint8Array,
 ): Promise<Uint8Array[]> {
@@ -48,7 +48,7 @@ async function decodeAvroFile(filePath: string): Promise<Uint8Array[]> {
 
     const newLocal = await Deno.readFile(filePath);
     const b = await decodeAvroToEncodedArrayOfMessages(newLocal);
-    return b.map((arr) => NestedCompressedPacketsDecode(arr, MessageType));
+    return b.map((arr) => CompressedPacketsDecode(arr, MessageType));
 }
 if (import.meta.main) {
     const inputfilenames = [
@@ -90,7 +90,7 @@ async function main(
     }));
 }
 
-export function NestedCompressedPacketsDecode(
+export function CompressedPacketsDecode(
     p: Uint8Array,
     MessageType: EncodedDecodeMessageType,
 ): Uint8Array {
@@ -101,15 +101,15 @@ export function NestedCompressedPacketsDecode(
         throw new Error("sha512 mismatch:" + sha512);
     }
     //console.log(b);
-    if (b.haveAvroData > 1) {
-        return NestedCompressedPacketsDecode(
-            d,
-            MessageType,
-        );
-    }
-    if (b.haveAvroData == 1) {
-        return d;
-    }
+    // if (b.haveAvroData > 1) {
+    //     return CompressedPacketsDecode(
+    //         d,
+    //         MessageType,
+    //     );
+    // }
+    // if (b.haveAvroData == 1) {
+    //     return d;
+    // }
     return d;
 }
 
@@ -131,7 +131,7 @@ function decodeToAvroBuffer(
 
     return {
         sha512: a.sha512,
-        haveAvroData: a.haveAvroData,
+        // haveAvroData: a.haveAvroData,
         dictionary,
         messages,
     } satisfies EncodedMessageBigInt;

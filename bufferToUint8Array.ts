@@ -1,4 +1,4 @@
-export function bufferToUint8Array(buffer: Buffer): Uint8Array {
+export function bufferToUint8Array(buffer: Buffer<Uint8Array>): Uint8Array {
     //@ts-ignore
     const uint8Array = new Uint8Array(buffer.length);
     //@ts-ignore
