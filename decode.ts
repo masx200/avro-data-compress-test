@@ -140,6 +140,10 @@ function decodeUint8ArrayToMessages(b: EncodedMessageAvro): Uint8Array {
     let messages = b.messages;
     while (!Array.isArray(messages)) {
         const buf = decodeUint8ArrayToMessages(messages);
+        const sha512 = calculateSHA512([buf]);
+        if (sha512 != messages.sha512) {
+            throw new Error("sha512 mismatch:" + sha512);
+        }
         messages = Array.from(new Uint32Array(buf.buffer));
     }
     return Uint8Array.from(
