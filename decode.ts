@@ -95,7 +95,7 @@ export function CompressedPacketsDecode(
     MessageType: EncodedDecodeMessageType,
 ): Uint8Array {
     const b: EncodedMessageAvro = decodeToAvroBuffer(p, MessageType);
-    const d: Uint8Array = decodeUint8ArrayToMessages(b);
+    const d: Uint8Array = decodeUint8ArrayToMessagesRecursion(b);
     const sha512 = calculateSHA512([d]);
     if (sha512 != b.sha512) {
         throw new Error("sha512 mismatch:" + sha512);
@@ -117,6 +117,7 @@ function decodeToAvroBuffer(
     p: Uint8Array,
     MessageType: EncodedDecodeMessageType,
 ): EncodedMessageAvro {
+    // console.log(p);
     const a: EncodedMessageAvro = MessageType.fromBuffer(Buffer.from(p));
     console.log(a);
 
@@ -132,14 +133,16 @@ function decodeToAvroBuffer(
         messages,
     } satisfies EncodedMessageAvro;
 }
-function decodeUint8ArrayToMessages(b: EncodedMessageAvro): Uint8Array {
+function decodeUint8ArrayToMessagesRecursion(
+    b: EncodedMessageAvro,
+): Uint8Array {
     const dictionary = new Map<bigint, Uint8Array>();
     for (const [key, value] of Object.entries(b.dictionary)) {
         dictionary.set(BigInt(key.toString()), bufferToUint8Array(value));
     }
     let messages = b.messages;
     while (!Array.isArray(messages)) {
-        const buf = decodeUint8ArrayToMessages(messages);
+        const buf = decodeUint8ArrayToMessagesRecursion(messages);
         const sha512 = calculateSHA512([buf]);
         if (sha512 != messages.sha512) {
             throw new Error("sha512 mismatch:" + sha512);
