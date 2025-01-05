@@ -140,15 +140,15 @@ function decodeUint8ArrayToMessagesRecursion(
     for (const [key, value] of Object.entries(b.dictionary)) {
         dictionary.set(BigInt(key.toString()), bufferToUint8Array(value));
     }
-    let messages = b.messages;
-    while (!Array.isArray(messages)) {
+    const messages = b.messages;
+    /*  while (!Array.isArray(messages)) {
         const buf = decodeUint8ArrayToMessagesRecursion(messages);
         const sha512 = calculateSHA512([buf]);
         if (sha512 != messages.sha512) {
             throw new Error("sha512 mismatch:" + sha512);
         }
         messages = Array.from(new Uint32Array(buf.buffer));
-    }
+    } */
     return Uint8Array.from(
         messages.map((a) => {
             const c = BigInt(a.toString());

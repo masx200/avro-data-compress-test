@@ -22,9 +22,9 @@ export const MessageSchema = {
         },
     }, {
         "name": "messages",
-        "type": [{
+        "type": {
             "type": "array",
             "items": "int",
-        }, "EncodedMessage"],
+        },
     }],
 };

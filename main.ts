@@ -220,13 +220,13 @@ export function CompressedPacketsEncode(
     MAXLINELENGTH: number,
     MessageType: EncodedDecodeMessageType,
 ): Uint8Array {
-    let d = encodeUint8ArrayToMessages(p, MAXLINELENGTH);
-    d = encodeToAvroMessageRecursion(d, MAXLINELENGTH, MessageType);
+    const d = encodeUint8ArrayToMessages(p, MAXLINELENGTH);
+    /*    d = encodeToAvroMessageRecursion(d, MAXLINELENGTH, MessageType); */
     const b = encodeToAvroBuffer(d, MessageType);
 
     return b;
 }
-
+/*
 export function encodeToAvroMessageRecursion(
     data: EncodedMessageAvro,
     MAXLINELENGTH: number,
@@ -235,18 +235,29 @@ export function encodeToAvroMessageRecursion(
     const messages = data.messages;
     if (Array.isArray(messages)) {
         const p = new Uint8Array(Uint32Array.from(messages).buffer);
-        const d = encodeUint8ArrayToMessages(p, MAXLINELENGTH);
+        let d = encodeUint8ArrayToMessages(p, MAXLINELENGTH);
         const b = encodeToAvroBuffer(d, MessageType);
-        if (b.length < messages.length * 4) {
-            console.log("encodeToAvroMessageRecursion success");
-            data.messages = encodeToAvroMessageRecursion(
+        if (
+            b.length < p.length && Array.isArray(d.messages) &&
+            d.messages.length < messages.length
+        ) {
+            console.log(
+                "encodeToAvroMessageRecursion success",
+                b.length,
+                p.length,
+            );
+            d = encodeToAvroMessageRecursion(
                 d,
                 MAXLINELENGTH,
                 MessageType,
             );
+            data.messages = d;
+
             return data;
         }
+        console.log("encodeToAvroMessageRecursion failure", b.length, p.length);
     }
-    console.log("encodeToAvroMessageRecursion failure");
+
     return data;
 }
+ */
