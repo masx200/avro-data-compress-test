@@ -30,7 +30,7 @@ export async function decodeAvroToEncodedArrayOfMessages(
             bufferToUint8Array(compressedData),
         );
         decodedDataArray.push(
-            bufferToUint8Array(Buffer.from(decompressedElement)),
+            decompressedElement,
         );
     }
 
