@@ -238,6 +238,7 @@ export function encodeToAvroMessageRecursion(
         const d = encodeUint8ArrayToMessages(p, MAXLINELENGTH);
         const b = encodeToAvroBuffer(d, MessageType);
         if (b.length < messages.length * 4) {
+            console.log("encodeToAvroMessageRecursion success");
             data.messages = encodeToAvroMessageRecursion(
                 d,
                 MAXLINELENGTH,
@@ -246,5 +247,6 @@ export function encodeToAvroMessageRecursion(
             return data;
         }
     }
+    console.log("encodeToAvroMessageRecursion failure");
     return data;
 }
