@@ -11,7 +11,7 @@ export const MessageSchema = {
     "fields": [
         {
             "name": "haveAvroData",
-            "type": "boolean",
+            "type": "int",
         },
         {
             "name": "dictionary",

@@ -92,7 +92,7 @@ async function main(inputfilename: string, outputfilename: string) {
                 c,
                 MAXLINELENGTH,
                 MessageType,
-                false,
+                1,
             )
         ),
         outputfilename,
@@ -177,7 +177,7 @@ export function encodeUint8ArrayToMessages(
     }
 
     const data: EncodedMessageBigInt = {
-        haveAvroData: false,
+        haveAvroData: 0,
         dictionary: dictionary,
         messages: messages.flat(),
     } satisfies EncodedMessageBigInt;
@@ -212,18 +212,18 @@ export function NestedCompressedPacketsEncode(
     p: Uint8Array,
     MAXLINELENGTH: number,
     MessageType: EncodedDecodeMessageType,
-    haveAvroData: boolean,
+    haveAvroData: number,
 ): Uint8Array {
     const d = encodeUint8ArrayToMessages(p, MAXLINELENGTH);
     d.haveAvroData = haveAvroData;
-
+    console.log(d);
     const b = encodeToAvroBuffer(d, MessageType);
     if (b.length < p.length) {
         return NestedCompressedPacketsEncode(
             b,
             MAXLINELENGTH,
             MessageType,
-            true,
+            haveAvroData + 1,
         );
     }
     return p;

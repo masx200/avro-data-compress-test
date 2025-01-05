@@ -84,12 +84,15 @@ export function NestedCompressedPacketsDecode(
 ): Uint8Array {
     const b: EncodedMessageBigInt = decodeToAvroBuffer(p, MessageType);
     const d: Uint8Array = decodeUint8ArrayToMessages(b);
-
-    if (b.haveAvroData) {
+    console.log(b);
+    if (b.haveAvroData > 1) {
         return NestedCompressedPacketsDecode(
             d,
             MessageType,
         );
+    }
+    if (b.haveAvroData == 1) {
+        return d;
     }
     return d;
 }
