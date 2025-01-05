@@ -121,11 +121,9 @@ if (import.meta.main) {
         await main(inputfilename, outputfilename);
     }
 }
-
-async function saveEncodedMessagesAsAvro(
+export async function EncodedArrayOfMessagesAsAvro(
     dataarray: Uint8Array[],
-    outputfilename: string,
-) {
+): Promise<Uint8Array> {
     const aom: EncodedArrayOfMessageAvro = [];
     for (const data of dataarray) {
         aom.push(Buffer.from(await gzipCompress(data)));
@@ -134,6 +132,14 @@ async function saveEncodedMessagesAsAvro(
     const newLocal_4 = await gzipCompress(
         bufferToUint8Array(paoms.toBuffer(aom)),
     );
+
+    return newLocal_4;
+}
+async function saveEncodedMessagesAsAvro(
+    dataarray: Uint8Array[],
+    outputfilename: string,
+) {
+    const newLocal_4 = await EncodedArrayOfMessagesAsAvro(dataarray);
     await Deno.writeFile(
         outputfilename,
         newLocal_4,
