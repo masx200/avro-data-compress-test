@@ -190,10 +190,12 @@ export function encodeUint8ArrayToMessages(
     } satisfies EncodedMessageBigInt;
     return data;
 }
-export function encodeToAvroBuffer(
+export function encodeToAvroBufferNested(
     data: EncodedMessageBigInt,
     MessageType: EncodedDecodeMessageType,
+    haveAvroData: number,
 ): Uint8Array {
+    data.haveAvroData = haveAvroData;
     const newLocal_5 = Uint32Array.from(
         data.messages.map((a) => Number(a.toString())),
     );
@@ -228,16 +230,16 @@ export function NestedCompressedPacketsEncode(
     const d = encodeUint8ArrayToMessages(p, MAXLINELENGTH);
     d.haveAvroData = haveAvroData;
     //console.log(d);
-    const b = encodeToAvroBuffer(d, MessageType);
-    if (b.length < p.length) {
-        console.log("compressed success", p.length, b.length);
-        return NestedCompressedPacketsEncode(
-            b,
-            MAXLINELENGTH,
-            MessageType,
-            haveAvroData + 1,
-        );
-    }
-    console.log("compressed failure", p.length, b.length);
-    return p;
+    const b = encodeToAvroBufferNested(d, MessageType, haveAvroData);
+    // if (b.length < p.length) {
+    //     console.log("compressed success", p.length, b.length);
+    //     return NestedCompressedPacketsEncode(
+    //         b,
+    //         MAXLINELENGTH,
+    //         MessageType,
+    //         haveAvroData + 1,
+    //     );
+    // }
+    // console.log("compressed failure", p.length, b.length);
+    return b;
 }
