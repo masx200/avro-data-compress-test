@@ -82,7 +82,7 @@ async function main(inputfilename: string, outputfilename: string) {
 
     const content = await Deno.readFile(inputfilename);
     const MAXLINELENGTH = 1024; //32; //64; //128; //256; //512; //1024;
-    const MAXCHUNCKLENGTH = 1024 * 5351;
+    const MAXCHUNCKLENGTH = 1024 * 2675;
     const dataarray: Uint8Array[] = splitUint8ArrayIntoChunks(
         content,
         MAXCHUNCKLENGTH,
@@ -184,7 +184,7 @@ export function encodeUint8ArrayToMessages(
 // messages.push([]);
 } */
     }
-    console.log(map);
+    // console.log(map);
     const data: EncodedMessageBigInt = {
         dictionary: dictionary,
         messages: messages.flat(),
