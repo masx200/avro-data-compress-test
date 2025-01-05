@@ -83,63 +83,17 @@ async function main(inputfilename: string, outputfilename: string) {
     const content = await Deno.readFile(inputfilename);
     const MAXLINELENGTH = 1024; //32; //64; //128; //256; //512; //1024;
     const MAXCHUNCKLENGTH = 1024 * 5351;
-    const dataarray: EncodedMessageBigInt[] = splitUint8ArrayIntoChunks(
+    const dataarray: Uint8Array[] = splitUint8ArrayIntoChunks(
         content,
         MAXCHUNCKLENGTH,
-    ).map(
-        function (c) {
-            const counter = new Map<string, bigint>();
-            const dictionary = new Map<bigint, Uint8Array>();
-            dictionary.set(0n, new Uint8Array());
-            const map = new Map<string, bigint[]>();
-            let index = 0n;
-
-            // let rawsize = 0n;
-            const messages: bigint[][] = [];
-            let count = 0;
-            for (const line of splitUint8ArrayIntoChunks(c, MAXLINELENGTH)) {
-                if (line.length !== 0) {
-                    // console.log("读取到第" + count + "次");
-                    // console.log(line);
-                    // rawsize += BigInt(line.length);
-                    const newLocal_1 = handleline(
-                        {
-                            dictionary,
-                            line,
-                            MAXLINELENGTH,
-                            counter,
-                            getindex: () => index,
-                            setindex: (v) => index = v,
-                            map,
-                        },
-                    );
-                    messages.push(newLocal_1);
-                    // console.log("encode", { line, result: newLocal_1 });
-                    // console.log("decode", {
-                    //     result: newLocal_1,
-                    //     line: newLocal_1.map((a) => {
-                    //         const newLocal_3 = (decode.get(a)) as string;
-                    //         return newLocal_3;
-                    //     }).join(""),
-                    // });
-                    count++;
-                } /* else {
-        // messages.push([]);
-    } */
-            }
-            const data: EncodedMessageBigInt = {
-                dictionary: dictionary,
-                messages: messages.flat(),
-            } satisfies EncodedMessageBigInt;
-            return data;
-        },
+    ).map((c) => (encodeUint8ArrayToMessages(c, MAXLINELENGTH))).map((c) =>
+        encodeToAvroBuffer(c, MessageType)
     );
 
     // console.log(Object.fromEntries(counter));
     // console.log(Array.from(decode));
     await saveEncodedMessagesAsAvro(
         dataarray,
-        MessageType,
         outputfilename,
     );
 }
@@ -168,27 +122,14 @@ if (import.meta.main) {
 }
 
 async function saveEncodedMessagesAsAvro(
-    dataarray: EncodedMessageBigInt[],
-    MessageType: EncodedDecodeMessageType,
+    dataarray: Uint8Array[],
     outputfilename: string,
 ) {
     const aom: EncodedArrayOfMessageAvro = [];
     for (const data of dataarray) {
         // console.log(data);
-        const em: EncodedMessageAvro = {
-            dictionary: ObjectToArray(
-                Array.from(data.dictionary), /* .map((
-                    a,
-                ) => [a[0].toString(), a[1]]),
-            ) */
-            ),
-            messages: data.messages.map((a) => Number(a.toString())),
-        } satisfies EncodedMessageAvro;
-        // console.log(em);
-        const buf = MessageType.toBuffer(em);
 
-        const newLocal_3 = bufferToUint8Array(buf);
-        aom.push(Buffer.from(await gzipCompress(newLocal_3)));
+        aom.push(Buffer.from(await gzipCompress(data)));
         // await Deno.writeFile(outputfilename, );
     }
     const paoms = parseArrayOfMessageSchema();
@@ -199,4 +140,73 @@ async function saveEncodedMessagesAsAvro(
         outputfilename,
         newLocal_4,
     );
+}
+export function encodeUint8ArrayToMessages(
+    c: Uint8Array,
+    MAXLINELENGTH: number,
+): EncodedMessageBigInt {
+    const counter = new Map<string, bigint>();
+    const dictionary = new Map<bigint, Uint8Array>();
+    dictionary.set(0n, new Uint8Array());
+    const map = new Map<string, bigint[]>();
+    let index = 0n;
+
+    // let rawsize = 0n;
+    const messages: bigint[][] = [];
+    // let count = 0;
+    for (const line of splitUint8ArrayIntoChunks(c, MAXLINELENGTH)) {
+        if (line.length !== 0) {
+            // console.log("读取到第" + count + "次");
+            // console.log(line);
+            // rawsize += BigInt(line.length);
+            const newLocal_1 = handleline(
+                {
+                    dictionary,
+                    line,
+                    MAXLINELENGTH,
+                    counter,
+                    getindex: () => index,
+                    setindex: (v) => index = v,
+                    map,
+                },
+            );
+            messages.push(newLocal_1);
+            // console.log("encode", { line, result: newLocal_1 });
+            // console.log("decode", {
+            //     result: newLocal_1,
+            //     line: newLocal_1.map((a) => {
+            //         const newLocal_3 = (decode.get(a)) as string;
+            //         return newLocal_3;
+            //     }).join(""),
+            // });
+            // count++;
+        } /* else {
+// messages.push([]);
+} */
+    }
+    console.log(map);
+    const data: EncodedMessageBigInt = {
+        dictionary: dictionary,
+        messages: messages.flat(),
+    } satisfies EncodedMessageBigInt;
+    return data;
+}
+export function encodeToAvroBuffer(
+    data: EncodedMessageBigInt,
+    MessageType: EncodedDecodeMessageType,
+): Uint8Array {
+    const em: EncodedMessageAvro = {
+        dictionary: ObjectToArray(
+            Array.from(data.dictionary), /* .map((
+                a,
+            ) => [a[0].toString(), a[1]]),
+        ) */
+        ),
+        messages: data.messages.map((a) => Number(a.toString())),
+    } satisfies EncodedMessageAvro;
+    // console.log(em);
+    const buf = MessageType.toBuffer(em);
+
+    const newLocal_3 = bufferToUint8Array(buf);
+    return newLocal_3;
 }
