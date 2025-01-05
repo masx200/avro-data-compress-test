@@ -86,7 +86,7 @@ async function main(inputfilename: string, outputfilename: string) {
         content,
         MAXCHUNCKLENGTH,
     );
-    const sha512 = calculateSHA512(content);
+    const sha512 = calculateSHA512([content]);
     await saveEncodedMessagesAsAvro(
         dataarray.map((c) =>
             NestedCompressedPacketsEncode(

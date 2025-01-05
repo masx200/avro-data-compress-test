@@ -10,6 +10,7 @@ import {
     EncodedArrayOfMessageAvro,
     parseArrayOfMessageSchema,
 } from "./parseArrayOfMessageSchema.ts";
+import { calculateSHA512 } from "./calculateSHA512.ts";
 export async function decodeAvroToEncodedArrayOfMessages(
     data: Uint8Array,
 ): Promise<Uint8Array[]> {
@@ -25,7 +26,7 @@ export async function decodeAvroToEncodedArrayOfMessages(
     const decodedDataArray: Uint8Array[] = [];
 
     // Step 4: Decompress each element in the EncodedArrayOfMessageAvro
-    for (const compressedData of aom) {
+    for (const compressedData of aom.data) {
         const decompressedElement = await gzipDecompress(
             bufferToUint8Array(compressedData),
         );
@@ -34,7 +35,11 @@ export async function decodeAvroToEncodedArrayOfMessages(
             decompressedElement,
         );
     }
-
+    console.log(aom);
+    const sha512 = calculateSHA512(decodedDataArray);
+    if (sha512 != aom.sha512) {
+        throw new Error("sha512 mismatch");
+    }
     return decodedDataArray;
 }
 async function decodeAvroFile(filePath: string): Promise<Uint8Array[]> {
@@ -111,6 +116,7 @@ function decodeToAvroBuffer(
     const messages = a.messages.map((arr) => BigInt(arr.toString()));
 
     return {
+        sha512: "",
         haveAvroData: a.haveAvroData,
         dictionary,
         messages,
