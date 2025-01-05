@@ -61,12 +61,14 @@ if (import.meta.main) {
         "example/input3.gz",
         "example/input2.gz",
         "example/input1.gz",
+        "example/input5.gz",
     ];
     const outputfilenames = [
         "example/input4.raw",
         "example/input3.raw",
         "example/input2.raw",
         "example/input1.raw",
+        "example/input5.raw",
     ];
     const promises: Promise<void>[] = [];
     for (

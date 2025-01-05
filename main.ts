@@ -121,12 +121,14 @@ if (import.meta.main) {
         "example/input3.txt",
         "example/input2.txt",
         "example/input1.txt",
+        "example/input5.txt",
     ];
     const outputfilenames = [
         "example/input4.gz",
         "example/input3.gz",
         "example/input2.gz",
         "example/input1.gz",
+        "example/input5.gz",
     ];
     const promises: Promise<void>[] = [];
     for (
