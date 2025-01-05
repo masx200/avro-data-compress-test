@@ -75,7 +75,11 @@ function handleline(
         return result;
     }
 }
-
+/**
+ * 主函数，负责读取输入文件，压缩内容，并将压缩后的数据保存到输出文件
+ * @param inputfilename 输入文件名
+ * @param outputfilename 输出文件名
+ */
 async function main(inputfilename: string, outputfilename: string) {
     const MessageType = parseEncodedMessageSchema();
 
@@ -87,14 +91,26 @@ async function main(inputfilename: string, outputfilename: string) {
         MAXCHUNCKLENGTH,
     );
 
+    const newLocal_5 = await Promise.all(
+        dataarray.map((a) => {
+            return gzipCompress(a);
+        }),
+    );
     await saveEncodedMessagesAsAvro(
-        dataarray.map((c) =>
-            CompressedPacketsEncode(
+        newLocal_5.map((c) => {
+            return CompressedPacketsEncode(
                 c,
                 MAXLINELENGTH,
                 MessageType,
-            )
-        ),
+            );
+            /*   }).map((c) => {
+            //先测试压缩两次的效果
+            return CompressedPacketsEncode(
+                c,
+                MAXLINELENGTH,
+                MessageType,
+            ); */
+        }),
         outputfilename,
     );
 }

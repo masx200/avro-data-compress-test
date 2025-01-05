@@ -48,7 +48,12 @@ async function decodeAvroFile(filePath: string): Promise<Uint8Array[]> {
 
     const newLocal = await Deno.readFile(filePath);
     const b = await decodeAvroToEncodedArrayOfMessages(newLocal);
-    return b.map((arr) => CompressedPacketsDecode(arr, MessageType));
+    return b.map((arr) => {
+        return CompressedPacketsDecode(arr, MessageType);
+        /*  }).map((arr) => {
+        //先测试压缩两次的效果
+        return CompressedPacketsDecode(arr, MessageType); */
+    });
 }
 if (import.meta.main) {
     const inputfilenames = [
@@ -75,6 +80,11 @@ if (import.meta.main) {
     }
     await Promise.all(promises);
 }
+/**
+ * 异步处理函数，用于读取Avro文件，解码并解压缩内容，最后将结果写入到指定的文件中
+ * @param inputfilename 输入的Avro文件名
+ * @param outputfilename 输出处理结果的文件名
+ */
 async function main(
     inputfilename: string,
     outputfilename: string,
@@ -84,8 +94,12 @@ async function main(
         create: true,
     });
     const decodedData = await decodeAvroFile(inputfilename);
-
-    await Promise.all(decodedData.map(async (arr) => {
+    const newLocal_5 = await Promise.all(
+        decodedData.map((a) => {
+            return gzipDeCompress(a);
+        }),
+    );
+    await Promise.all(newLocal_5.map(async (arr) => {
         await fsfile.write(arr);
     }));
 }
