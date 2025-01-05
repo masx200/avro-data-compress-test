@@ -9,12 +9,12 @@ import { ObjectToArray } from "./ObjectToArray.ts";
 import { parseEncodedMessageSchema } from "./parseEncodedMessageSchema.ts";
 import { uint8ArrayToHex } from "./uint8ArrayToHex.ts";
 
-import { splitUint8ArrayIntoChunks } from "./splitUint8ArrayIntoChunks.ts";
+import { Buffer } from "node:buffer";
 import {
     EncodedArrayOfMessageAvro,
     parseArrayOfMessageSchema,
 } from "./parseArrayOfMessageSchema.ts";
-import { Buffer } from "node:buffer";
+import { splitUint8ArrayIntoChunks } from "./splitUint8ArrayIntoChunks.ts";
 function handleline(
     options: {
         dictionary: Map<bigint, Uint8Array>;
@@ -86,14 +86,21 @@ async function main(inputfilename: string, outputfilename: string) {
     const dataarray: Uint8Array[] = splitUint8ArrayIntoChunks(
         content,
         MAXCHUNCKLENGTH,
-    ).map((c) => (encodeUint8ArrayToMessages(c, MAXLINELENGTH))).map((c) =>
-        encodeToAvroBuffer(c, MessageType)
-    );
+    ); //.map((c) => (encodeUint8ArrayToMessages(c, MAXLINELENGTH))).map((c) =>
+    //    encodeToAvroBuffer(c, MessageType)
+    //   );
 
     // console.log(Object.fromEntries(counter));
     // console.log(Array.from(decode));
     await saveEncodedMessagesAsAvro(
-        dataarray,
+        dataarray.map((c) =>
+            NestedCompressedPacketsEncode(
+                c,
+                MAXLINELENGTH,
+                MessageType,
+                false,
+            )
+        ),
         outputfilename,
     );
 }
@@ -187,6 +194,7 @@ export function encodeUint8ArrayToMessages(
     // console.log(map);
     // console.log(dictionary);
     const data: EncodedMessageBigInt = {
+        haveAvroData: false,
         dictionary: dictionary,
         messages: messages.flat(),
     } satisfies EncodedMessageBigInt;
@@ -197,6 +205,7 @@ export function encodeToAvroBuffer(
     MessageType: EncodedDecodeMessageType,
 ): Uint8Array {
     const em: EncodedMessageAvro = {
+        haveAvroData: data.haveAvroData,
         dictionary: ObjectToArray(
             Array.from(data.dictionary), /* .map((
                 a,
@@ -210,4 +219,32 @@ export function encodeToAvroBuffer(
 
     const newLocal_3 = bufferToUint8Array(buf);
     return newLocal_3;
+}
+/**
+ * 这段 TypeScript 代码定义了一个函数 NestedCompressedPacketsEncode，用于对输入的字节数组进行编码和压缩。具体功能如下：
+*
+将输入的字节数组 p 编码为消息列表，并设置是否包含 Avro 数据。
+将消息列表编码为 Avro 缓冲区。
+如果编码后的缓冲区长度小于原始字节数组长度，则递归调用自身继续压缩，直到无法进一步压缩为止。
+返回最终的字节数组及是否包含 Avro 数据的标志。
+*/
+export function NestedCompressedPacketsEncode(
+    p: Uint8Array,
+    MAXLINELENGTH: number,
+    MessageType: EncodedDecodeMessageType,
+    haveAvroData: boolean,
+): Uint8Array {
+    const d = encodeUint8ArrayToMessages(p, MAXLINELENGTH);
+    d.haveAvroData = haveAvroData;
+    console.log(d);
+    const b = encodeToAvroBuffer(d, MessageType);
+    if (b.length < p.length) {
+        return NestedCompressedPacketsEncode(
+            b,
+            MAXLINELENGTH,
+            MessageType,
+            true,
+        );
+    }
+    return p;
 }

@@ -10,6 +10,10 @@ export const MessageSchema = {
     "name": "EncodedMessage",
     "fields": [
         {
+            "name": "haveAvroData",
+            "type": "boolean",
+        },
+        {
             "name": "dictionary",
             "type": {
                 "type": "array",
