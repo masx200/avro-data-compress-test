@@ -13,7 +13,7 @@ export function splitUint8ArrayIntoChunks(
 
         results.push(Uint8Array.from(newLocal));
     }
-    // console.log(
+    // //console.log(
     //     str.length,
     //     results.map((a) => a.length).reduce((a, b) => a + b, 0),
     // );

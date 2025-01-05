@@ -8,24 +8,23 @@ import { EncodedDecodeMessageType } from "./EncodedDecodeMessageType.ts";
 export const MessageSchema = {
     "type": "record",
     "name": "EncodedMessage",
-    "fields": [
-        {
-            "name": "haveAvroData",
-            "type": "int",
+    "fields": [{
+        "type": "string",
+        "name": "sha512",
+    }, {
+        "name": "haveAvroData",
+        "type": "int",
+    }, {
+        "name": "dictionary",
+        "type": {
+            "type": "array",
+            "items": "bytes",
         },
-        {
-            "name": "dictionary",
-            "type": {
-                "type": "array",
-                "items": "bytes",
-            },
+    }, {
+        "name": "messages",
+        "type": {
+            "type": "array",
+            "items": "int",
         },
-        {
-            "name": "messages",
-            "type": {
-                "type": "array",
-                "items": "int",
-            },
-        },
-    ],
+    }],
 };

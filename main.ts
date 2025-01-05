@@ -8,6 +8,7 @@ import { parseEncodedMessageSchema } from "./parseEncodedMessageSchema.ts";
 import { uint8ArrayToHex } from "./uint8ArrayToHex.ts";
 
 import { Buffer } from "node:buffer";
+import { calculateSHA512 } from "./calculateSHA512.ts";
 import {
     EncodedArrayOfMessageAvro,
     parseArrayOfMessageSchema,
@@ -85,7 +86,7 @@ async function main(inputfilename: string, outputfilename: string) {
         content,
         MAXCHUNCKLENGTH,
     );
-
+    const sha512 = calculateSHA512(content);
     await saveEncodedMessagesAsAvro(
         dataarray.map((c) =>
             NestedCompressedPacketsEncode(
@@ -96,6 +97,7 @@ async function main(inputfilename: string, outputfilename: string) {
             )
         ),
         outputfilename,
+        sha512,
     );
 }
 
@@ -125,12 +127,15 @@ if (import.meta.main) {
 }
 export async function EncodedArrayOfMessagesAsAvro(
     dataarray: Uint8Array[],
+    sha512: string,
 ): Promise<Uint8Array> {
-    const aom: EncodedArrayOfMessageAvro = [];
+    const aom: EncodedArrayOfMessageAvro = { data: [], sha512: sha512 };
     for (const data of dataarray) {
-        aom.push(Buffer.from(await gzipCompress(data)));
+        // console.log("compressing", data.length);
+        aom.data.push(Buffer.from(await gzipCompress(data)));
     }
     const paoms = parseArrayOfMessageSchema();
+    console.log(aom);
     const newLocal_4 = await gzipCompress(
         bufferToUint8Array(paoms.toBuffer(aom)),
     );
@@ -140,8 +145,9 @@ export async function EncodedArrayOfMessagesAsAvro(
 async function saveEncodedMessagesAsAvro(
     dataarray: Uint8Array[],
     outputfilename: string,
+    sha512: string,
 ) {
-    const newLocal_4 = await EncodedArrayOfMessagesAsAvro(dataarray);
+    const newLocal_4 = await EncodedArrayOfMessagesAsAvro(dataarray, sha512);
     await Deno.writeFile(
         outputfilename,
         newLocal_4,
@@ -177,6 +183,7 @@ export function encodeUint8ArrayToMessages(
     }
 
     const data: EncodedMessageBigInt = {
+        sha512: "",
         haveAvroData: 0,
         dictionary: dictionary,
         messages: messages.flat(),
@@ -188,6 +195,7 @@ export function encodeToAvroBuffer(
     MessageType: EncodedDecodeMessageType,
 ): Uint8Array {
     const em: EncodedMessageAvro = {
+        sha512: data.sha512,
         haveAvroData: data.haveAvroData,
         dictionary: ObjectToArray(
             Array.from(data.dictionary),
@@ -216,7 +224,7 @@ export function NestedCompressedPacketsEncode(
 ): Uint8Array {
     const d = encodeUint8ArrayToMessages(p, MAXLINELENGTH);
     d.haveAvroData = haveAvroData;
-    console.log(d);
+    //console.log(d);
     const b = encodeToAvroBuffer(d, MessageType);
     if (b.length < p.length) {
         return NestedCompressedPacketsEncode(

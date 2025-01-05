@@ -1,4 +1,7 @@
-export type EncodedArrayOfMessageAvro = Buffer<Uint8Array>[];
+export type EncodedArrayOfMessageAvro = {
+    sha512: string;
+    data: Buffer<Uint8Array>[];
+};
 
 export interface EncodedDecodeArrayOfMessageType {
     fromBuffer(buf: Buffer<Uint8Array>): EncodedArrayOfMessageAvro;
@@ -13,7 +16,16 @@ export function parseArrayOfMessageSchema(): EncodedDecodeArrayOfMessageType {
 }
 
 export const ArrayOfMessageSchema = {
-    "type": "array",
+    "type": "record",
     "name": "ArrayOfMessage",
-    "items": "bytes",
+    "fields": [{
+        "name": "data",
+        "type": {
+            "type": "array",
+            "items": "bytes",
+        },
+    }, {
+        "type": "string",
+        "name": "sha512",
+    }],
 };

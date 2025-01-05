@@ -29,6 +29,7 @@ export async function decodeAvroToEncodedArrayOfMessages(
         const decompressedElement = await gzipDecompress(
             bufferToUint8Array(compressedData),
         );
+        // console.log("decompressing", decompressedElement.length);
         decodedDataArray.push(
             decompressedElement,
         );
@@ -84,7 +85,7 @@ export function NestedCompressedPacketsDecode(
 ): Uint8Array {
     const b: EncodedMessageBigInt = decodeToAvroBuffer(p, MessageType);
     const d: Uint8Array = decodeUint8ArrayToMessages(b);
-    console.log(b);
+    //console.log(b);
     if (b.haveAvroData > 1) {
         return NestedCompressedPacketsDecode(
             d,
