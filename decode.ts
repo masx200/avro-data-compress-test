@@ -12,6 +12,7 @@ import {
     EncodedArrayOfMessageAvro,
     parseArrayOfMessageSchema,
 } from "./parseArrayOfMessageSchema.ts";
+import path from "node:path";
 export async function decodeAvroToEncodedArrayOfMessages(
     data: Uint8Array,
 ): Promise<Uint8Array[]> {
@@ -56,20 +57,17 @@ async function decodeAvroFile(filePath: string): Promise<Uint8Array[]> {
     });
 }
 if (import.meta.main) {
-    const inputfilenames = [
-        "example/input4.gz",
-        "example/input3.gz",
-        "example/input2.gz",
-        "example/input1.gz",
-        "example/input5.gz",
-    ];
-    const outputfilenames = [
-        "example/input4.raw",
-        "example/input3.raw",
-        "example/input2.raw",
-        "example/input1.raw",
-        "example/input5.raw",
-    ];
+    const inputfilenames =
+        (await Array.fromAsync(await Deno.readDir("compressed"))).filter((e) =>
+            e.isFile
+        ).map((e) => path.resolve("compressed", e.name));
+    console.log(inputfilenames);
+
+    const outputfilenames =
+        (await Array.fromAsync(await Deno.readDir("compressed"))).filter((e) =>
+            e.isFile
+        ).map((e) => path.resolve("decompressed", e.name));
+    console.log(outputfilenames);
     const promises: Promise<void>[] = [];
     for (
         let i = 0;
@@ -91,6 +89,7 @@ async function main(
     inputfilename: string,
     outputfilename: string,
 ) {
+    console.log(inputfilename, outputfilename);
     using fsfile = await Deno.open(outputfilename, {
         write: true,
         create: true,

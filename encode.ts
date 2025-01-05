@@ -14,6 +14,7 @@ import {
     parseArrayOfMessageSchema,
 } from "./parseArrayOfMessageSchema.ts";
 import { splitUint8ArrayIntoChunks } from "./splitUint8ArrayIntoChunks.ts";
+import path from "node:path";
 function handleline(
     options: {
         dictionary: Map<bigint, Uint8Array>;
@@ -81,6 +82,7 @@ function handleline(
  * @param outputfilename 输出文件名
  */
 async function main(inputfilename: string, outputfilename: string) {
+    console.log(inputfilename, outputfilename);
     const MessageType = parseEncodedMessageSchema();
 
     const content = await Deno.readFile(inputfilename);
@@ -116,20 +118,17 @@ async function main(inputfilename: string, outputfilename: string) {
 }
 
 if (import.meta.main) {
-    const inputfilenames = [
-        "example/input4.txt",
-        "example/input3.txt",
-        "example/input2.txt",
-        "example/input1.txt",
-        "example/input5.txt",
-    ];
-    const outputfilenames = [
-        "example/input4.gz",
-        "example/input3.gz",
-        "example/input2.gz",
-        "example/input1.gz",
-        "example/input5.gz",
-    ];
+    const inputfilenames =
+        (await Array.fromAsync(await Deno.readDir("example"))).filter((e) =>
+            e.isFile
+        ).map((e) => path.resolve("example", e.name));
+    console.log(inputfilenames);
+
+    const outputfilenames =
+        (await Array.fromAsync(await Deno.readDir("example"))).filter((e) =>
+            e.isFile
+        ).map((e) => path.resolve("compressed", e.name));
+    console.log(outputfilenames);
     const promises: Promise<void>[] = [];
     for (
         let i = 0;
