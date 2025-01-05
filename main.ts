@@ -185,6 +185,7 @@ export function encodeUint8ArrayToMessages(
 } */
     }
     // console.log(map);
+    // console.log(dictionary);
     const data: EncodedMessageBigInt = {
         dictionary: dictionary,
         messages: messages.flat(),
