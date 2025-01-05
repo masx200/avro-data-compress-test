@@ -81,12 +81,12 @@ async function main(inputfilename: string, outputfilename: string) {
 
     const content = await Deno.readFile(inputfilename);
     const MAXLINELENGTH = 1024;
-    const MAXCHUNCKLENGTH = 1024 * 1337;
+    const MAXCHUNCKLENGTH = 1024 * 1024;
     const dataarray: Uint8Array[] = splitUint8ArrayIntoChunks(
         content,
         MAXCHUNCKLENGTH,
     );
-    const sha512 = calculateSHA512([content]);
+
     await saveEncodedMessagesAsAvro(
         dataarray.map((c) =>
             NestedCompressedPacketsEncode(
@@ -97,7 +97,6 @@ async function main(inputfilename: string, outputfilename: string) {
             )
         ),
         outputfilename,
-        sha512,
     );
 }
 
@@ -114,7 +113,7 @@ if (import.meta.main) {
         "example/input2.gz",
         "example/input1.gz",
     ];
-
+    const promises: Promise<void>[] = [];
     for (
         let i = 0;
         i < inputfilenames.length;
@@ -122,13 +121,14 @@ if (import.meta.main) {
     ) {
         const inputfilename = inputfilenames[i];
         const outputfilename = outputfilenames[i];
-        await main(inputfilename, outputfilename);
+        promises.push(main(inputfilename, outputfilename));
     }
+    await Promise.all(promises);
 }
 export async function EncodedArrayOfMessagesAsAvro(
     dataarray: Uint8Array[],
-    sha512: string,
 ): Promise<Uint8Array> {
+    const sha512 = calculateSHA512(dataarray);
     const aom: EncodedArrayOfMessageAvro = { data: [], sha512: sha512 };
     for (const data of dataarray) {
         // console.log("compressing", data.length);
@@ -145,9 +145,8 @@ export async function EncodedArrayOfMessagesAsAvro(
 async function saveEncodedMessagesAsAvro(
     dataarray: Uint8Array[],
     outputfilename: string,
-    sha512: string,
 ) {
-    const newLocal_4 = await EncodedArrayOfMessagesAsAvro(dataarray, sha512);
+    const newLocal_4 = await EncodedArrayOfMessagesAsAvro(dataarray);
     await Deno.writeFile(
         outputfilename,
         newLocal_4,

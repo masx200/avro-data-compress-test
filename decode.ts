@@ -62,26 +62,31 @@ if (import.meta.main) {
         "example/input2.raw",
         "example/input1.raw",
     ];
-    await main(inputfilenames, outputfilenames);
-}
-async function main(
-    inputfilenames: string[],
-    outputfilenames: string[],
-) {
-    for (let i = 0; i < inputfilenames.length; i++) {
+    const promises: Promise<void>[] = [];
+    for (
+        let i = 0;
+        i < inputfilenames.length;
+        i++
+    ) {
         const inputfilename = inputfilenames[i];
         const outputfilename = outputfilenames[i];
-
-        using fsfile = await Deno.open(outputfilename, {
-            write: true,
-            create: true,
-        });
-        const decodedData = await decodeAvroFile(inputfilename);
-
-        await Promise.all(decodedData.map(async (arr) => {
-            await fsfile.write(arr);
-        }));
+        promises.push(main(inputfilename, outputfilename));
     }
+    await Promise.all(promises);
+}
+async function main(
+    inputfilename: string,
+    outputfilename: string,
+) {
+    using fsfile = await Deno.open(outputfilename, {
+        write: true,
+        create: true,
+    });
+    const decodedData = await decodeAvroFile(inputfilename);
+
+    await Promise.all(decodedData.map(async (arr) => {
+        await fsfile.write(arr);
+    }));
 }
 
 export function NestedCompressedPacketsDecode(
