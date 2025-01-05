@@ -45,11 +45,13 @@ async function decodeAvroFile(filePath: string): Promise<Uint8Array[]> {
 }
 if (import.meta.main) {
     const inputfilenames = [
+        "example/input4.gz",
         "example/input3.gz",
         "example/input2.gz",
         "example/input1.gz",
     ];
     const outputfilenames = [
+        "example/input4.raw",
         "example/input3.raw",
         "example/input2.raw",
         "example/input1.raw",

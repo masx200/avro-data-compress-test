@@ -101,11 +101,13 @@ async function main(inputfilename: string, outputfilename: string) {
 
 if (import.meta.main) {
     const inputfilenames = [
+        "example/input4.txt",
         "example/input3.txt",
         "example/input2.txt",
         "example/input1.txt",
     ];
     const outputfilenames = [
+        "example/input4.gz",
         "example/input3.gz",
         "example/input2.gz",
         "example/input1.gz",
