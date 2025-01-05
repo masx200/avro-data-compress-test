@@ -11,6 +11,7 @@ import {
     parseArrayOfMessageSchema,
 } from "./parseArrayOfMessageSchema.ts";
 import { calculateSHA512 } from "./calculateSHA512.ts";
+import { EncodedMessageAvro } from "./EncodedMessageAvro.ts";
 export async function decodeAvroToEncodedArrayOfMessages(
     data: Uint8Array,
 ): Promise<Uint8Array[]> {
@@ -95,6 +96,10 @@ export function NestedCompressedPacketsDecode(
 ): Uint8Array {
     const b: EncodedMessageBigInt = decodeToAvroBuffer(p, MessageType);
     const d: Uint8Array = decodeUint8ArrayToMessages(b);
+    const sha512 = calculateSHA512([d]);
+    if (sha512 != b.sha512) {
+        throw new Error("sha512 mismatch:" + sha512);
+    }
     //console.log(b);
     if (b.haveAvroData > 1) {
         return NestedCompressedPacketsDecode(
@@ -112,7 +117,8 @@ function decodeToAvroBuffer(
     p: Uint8Array,
     MessageType: EncodedDecodeMessageType,
 ): EncodedMessageBigInt {
-    const a = MessageType.fromBuffer(Buffer.from(p));
+    const a: EncodedMessageAvro = MessageType.fromBuffer(Buffer.from(p));
+    console.log(a);
     const dictionary = new Map<bigint, Uint8Array>();
     for (const [key, value] of Object.entries(a.dictionary)) {
         dictionary.set(BigInt(key.toString()), bufferToUint8Array(value));
@@ -121,7 +127,7 @@ function decodeToAvroBuffer(
     const messages = a.messages.map((arr) => BigInt(arr.toString()));
 
     return {
-        sha512: "",
+        sha512: a.sha512,
         haveAvroData: a.haveAvroData,
         dictionary,
         messages,

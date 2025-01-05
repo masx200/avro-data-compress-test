@@ -156,6 +156,7 @@ export function encodeUint8ArrayToMessages(
     c: Uint8Array,
     MAXLINELENGTH: number,
 ): EncodedMessageBigInt {
+    const sha512 = calculateSHA512([c]);
     const counter = new Map<string, bigint>();
     const dictionary = new Map<bigint, Uint8Array>();
     dictionary.set(0n, new Uint8Array());
@@ -182,7 +183,7 @@ export function encodeUint8ArrayToMessages(
     }
 
     const data: EncodedMessageBigInt = {
-        sha512: "",
+        sha512: sha512,
         haveAvroData: 0,
         dictionary: dictionary,
         messages: messages.flat(),
@@ -201,7 +202,7 @@ export function encodeToAvroBuffer(
         ),
         messages: data.messages.map((a) => Number(a.toString())),
     } satisfies EncodedMessageAvro;
-
+    console.log(em);
     const buf = MessageType.toBuffer(em);
 
     const newLocal_3 = bufferToUint8Array(buf);
