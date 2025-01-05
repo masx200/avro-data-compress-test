@@ -1,5 +1,3 @@
-//import Long from "long";
-
 import { bufferToUint8Array } from "./bufferToUint8Array.ts";
 import { EncodedDecodeMessageType } from "./EncodedDecodeMessageType.ts";
 import { EncodedMessageAvro } from "./EncodedMessageAvro.ts";
@@ -81,17 +79,13 @@ async function main(inputfilename: string, outputfilename: string) {
     const MessageType = parseEncodedMessageSchema();
 
     const content = await Deno.readFile(inputfilename);
-    const MAXLINELENGTH = 1024; //32; //64; //128; //256; //512; //1024;
+    const MAXLINELENGTH = 1024;
     const MAXCHUNCKLENGTH = 1024 * 1337;
     const dataarray: Uint8Array[] = splitUint8ArrayIntoChunks(
         content,
         MAXCHUNCKLENGTH,
-    ); //.map((c) => (encodeUint8ArrayToMessages(c, MAXLINELENGTH))).map((c) =>
-    //    encodeToAvroBuffer(c, MessageType)
-    //   );
+    );
 
-    // console.log(Object.fromEntries(counter));
-    // console.log(Array.from(decode));
     await saveEncodedMessagesAsAvro(
         dataarray.map((c) =>
             NestedCompressedPacketsEncode(
@@ -134,10 +128,7 @@ async function saveEncodedMessagesAsAvro(
 ) {
     const aom: EncodedArrayOfMessageAvro = [];
     for (const data of dataarray) {
-        // console.log(data);
-
         aom.push(Buffer.from(await gzipCompress(data)));
-        // await Deno.writeFile(outputfilename, );
     }
     const paoms = parseArrayOfMessageSchema();
     const newLocal_4 = await gzipCompress(
@@ -158,14 +149,10 @@ export function encodeUint8ArrayToMessages(
     const map = new Map<string, bigint[]>();
     let index = 0n;
 
-    // let rawsize = 0n;
     const messages: bigint[][] = [];
-    // let count = 0;
+
     for (const line of splitUint8ArrayIntoChunks(c, MAXLINELENGTH)) {
         if (line.length !== 0) {
-            // console.log("读取到第" + count + "次");
-            // console.log(line);
-            // rawsize += BigInt(line.length);
             const newLocal_1 = handleline(
                 {
                     dictionary,
@@ -178,21 +165,9 @@ export function encodeUint8ArrayToMessages(
                 },
             );
             messages.push(newLocal_1);
-            // console.log("encode", { line, result: newLocal_1 });
-            // console.log("decode", {
-            //     result: newLocal_1,
-            //     line: newLocal_1.map((a) => {
-            //         const newLocal_3 = (decode.get(a)) as string;
-            //         return newLocal_3;
-            //     }).join(""),
-            // });
-            // count++;
-        } /* else {
-// messages.push([]);
-} */
+        }
     }
-    // console.log(map);
-    // console.log(dictionary);
+
     const data: EncodedMessageBigInt = {
         haveAvroData: false,
         dictionary: dictionary,
@@ -207,14 +182,11 @@ export function encodeToAvroBuffer(
     const em: EncodedMessageAvro = {
         haveAvroData: data.haveAvroData,
         dictionary: ObjectToArray(
-            Array.from(data.dictionary), /* .map((
-                a,
-            ) => [a[0].toString(), a[1]]),
-        ) */
+            Array.from(data.dictionary),
         ),
         messages: data.messages.map((a) => Number(a.toString())),
     } satisfies EncodedMessageAvro;
-    // console.log(em);
+
     const buf = MessageType.toBuffer(em);
 
     const newLocal_3 = bufferToUint8Array(buf);
@@ -236,7 +208,7 @@ export function NestedCompressedPacketsEncode(
 ): Uint8Array {
     const d = encodeUint8ArrayToMessages(p, MAXLINELENGTH);
     d.haveAvroData = haveAvroData;
-    // console.log(d);
+
     const b = encodeToAvroBuffer(d, MessageType);
     if (b.length < p.length) {
         return NestedCompressedPacketsEncode(
