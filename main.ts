@@ -143,11 +143,15 @@ async function main(inputfilename: string, outputfilename: string) {
 }
 
 if (import.meta.main) {
-    const inputfilenames = ["input3.txt", "input2.txt", "input1.txt"];
+    const inputfilenames = [
+        "example/input3.txt",
+        "example/input2.txt",
+        "example/input1.txt",
+    ];
     const outputfilenames = [
-        "input3.avro.gz",
-        "input2.avro.gz",
-        "input1.avro.gz",
+        "example/input3.avro.gz",
+        "example/input2.avro.gz",
+        "example/input1.avro.gz",
     ];
 
     for (

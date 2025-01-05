@@ -35,14 +35,14 @@ async function decodeAvroFile(filePath: string): Promise<EncodedMessageBigInt> {
 }
 if (import.meta.main) {
     const inputfilenames = [
-        "input3.avro.gz",
-        "input2.avro.gz",
-        "input1.avro.gz",
+        "example/input3.avro.gz",
+        "example/input2.avro.gz",
+        "example/input1.avro.gz",
     ];
     const outputfilenames = [
-        "input3.txt.raw",
-        "input2.txt.raw",
-        "input1.txt.raw",
+        "example/input3.txt.raw",
+        "example/input2.txt.raw",
+        "example/input1.txt.raw",
     ];
     for (
         let i = 0;
