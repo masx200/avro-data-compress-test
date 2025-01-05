@@ -10,6 +10,11 @@ import { parseEncodedMessageSchema } from "./parseEncodedMessageSchema.ts";
 import { uint8ArrayToHex } from "./uint8ArrayToHex.ts";
 
 import { splitUint8ArrayIntoChunks } from "./splitUint8ArrayIntoChunks.ts";
+import {
+    EncodedArrayOfMessageAvro,
+    parseArrayOfMessageSchema,
+} from "./parseArrayOfMessageSchema.ts";
+import { Buffer } from "node:buffer";
 function handleline(
     options: {
         dictionary: Map<bigint, Uint8Array>;
@@ -149,9 +154,9 @@ if (import.meta.main) {
         "example/input1.txt",
     ];
     const outputfilenames = [
-        "example/input3.avro.gz",
-        "example/input2.avro.gz",
-        "example/input1.avro.gz",
+        "example/input3.gz",
+        "example/input2.gz",
+        "example/input1.gz",
     ];
 
     for (
@@ -170,6 +175,7 @@ async function saveEncodedMessagesAsAvro(
     MessageType: EncodedDecodeMessageType,
     outputfilename: string,
 ) {
+    const aom: EncodedArrayOfMessageAvro = [];
     for (const data of dataarray) {
         // console.log(data);
         const em: EncodedMessageAvro = {
@@ -184,6 +190,15 @@ async function saveEncodedMessagesAsAvro(
         const buf = MessageType.toBuffer(em);
 
         const newLocal_3 = bufferToUint8Array(buf);
-        await Deno.writeFile(outputfilename, await gzipCompress(newLocal_3));
+        aom.push(Buffer.from(await gzipCompress(newLocal_3)));
+        // await Deno.writeFile(outputfilename, );
     }
+    const paoms = parseArrayOfMessageSchema();
+    const newLocal_4 = await gzipCompress(
+        bufferToUint8Array(paoms.toBuffer(aom)),
+    );
+    await Deno.writeFile(
+        outputfilename,
+        newLocal_4,
+    );
 }
