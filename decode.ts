@@ -54,11 +54,13 @@ if (import.meta.main) {
         "example/input2.raw",
         "example/input1.raw",
     ];
-    for (
-        let i = 0;
-        i < inputfilenames.length;
-        i++
-    ) {
+    await main(inputfilenames, outputfilenames);
+}
+async function main(
+    inputfilenames: string[],
+    outputfilenames: string[],
+) {
+    for (let i = 0; i < inputfilenames.length; i++) {
         const inputfilename = inputfilenames[i];
         const outputfilename = outputfilenames[i];
 
@@ -73,6 +75,7 @@ if (import.meta.main) {
         }));
     }
 }
+
 export function NestedCompressedPacketsDecode(
     p: Uint8Array,
     MessageType: EncodedDecodeMessageType,
