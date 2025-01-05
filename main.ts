@@ -180,9 +180,10 @@ async function saveEncodedMessagesAsAvro(
         // console.log(data);
         const em: EncodedMessageAvro = {
             dictionary: ObjectToArray(
-                Array.from(data.dictionary).map((
+                Array.from(data.dictionary), /* .map((
                     a,
                 ) => [a[0].toString(), a[1]]),
+            ) */
             ),
             messages: data.messages.map((a) => Number(a.toString())),
         } satisfies EncodedMessageAvro;

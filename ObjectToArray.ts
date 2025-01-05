@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 
 export function ObjectToArray(
-    arg0: Array<[string, Uint8Array]>,
+    arg0: Array<[bigint, Uint8Array]>,
 ): (Buffer<Uint8Array>)[] {
     const array: (Buffer<Uint8Array>)[] = [];
     array.length = Object.keys(arg0).length;
