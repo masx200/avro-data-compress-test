@@ -91,7 +91,7 @@ export function NestedCompressedPacketsDecode(
             MessageType,
         );
     }
-    return p;
+    return d;
 }
 
 function decodeToAvroBuffer(
