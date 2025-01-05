@@ -4,33 +4,44 @@ import { gzipDecompress } from "./gzipDecompress.ts";
 
 import { bufferToUint8Array } from "./bufferToUint8Array.ts";
 import { EncodedDecodeMessageType } from "./EncodedDecodeMessageType.ts";
-import { EncodedMessageAvro } from "./EncodedMessageAvro.ts";
 import { parseEncodedMessageSchema } from "./parseEncodedMessageSchema.ts";
 
-async function decodeAvroFile(filePath: string): Promise<EncodedMessageBigInt> {
+import {
+    EncodedArrayOfMessageAvro,
+    parseArrayOfMessageSchema,
+} from "./parseArrayOfMessageSchema.ts";
+export async function decodeAvroToEncodedArrayOfMessages(
+    data: Uint8Array,
+): Promise<Uint8Array[]> {
+    // Step 1: Decompress the input Uint8Array
+    const decompressedData = await gzipDecompress(data);
+    const buf = Buffer.from(decompressedData);
+
+    // Step 2: Parse the decompressed data to get EncodedArrayOfMessageAvro
+    const paoms = parseArrayOfMessageSchema();
+    const aom: EncodedArrayOfMessageAvro = paoms.fromBuffer(buf);
+
+    // Step 3: Initialize an array to hold the decoded Uint8Arrays
+    const decodedDataArray: Uint8Array[] = [];
+
+    // Step 4: Decompress each element in the EncodedArrayOfMessageAvro
+    for (const compressedData of aom) {
+        const decompressedElement = await gzipDecompress(
+            bufferToUint8Array(compressedData),
+        );
+        decodedDataArray.push(
+            bufferToUint8Array(Buffer.from(decompressedElement)),
+        );
+    }
+
+    return decodedDataArray;
+}
+async function decodeAvroFile(filePath: string): Promise<Uint8Array[]> {
     const MessageType = parseEncodedMessageSchema();
 
     const newLocal = await Deno.readFile(filePath);
-
-    const buf = Buffer.from(await gzipDecompress(newLocal));
-
-    const decodedMessage: EncodedMessageAvro = MessageType.fromBuffer(buf);
-    // console.log(decodedMessage);
-
-    const dictionary = new Map<bigint, Uint8Array>();
-    for (const [key, value] of Object.entries(decodedMessage.dictionary)) {
-        dictionary.set(BigInt(key.toString()), bufferToUint8Array(value));
-    }
-
-    const messages = decodedMessage.messages.map((arr) =>
-        BigInt(arr.toString())
-    );
-
-    return {
-        haveAvroData: decodedMessage.haveAvroData,
-        dictionary,
-        messages,
-    } satisfies EncodedMessageBigInt;
+    const b = await decodeAvroToEncodedArrayOfMessages(newLocal);
+    return b.map((arr) => NestedCompressedPacketsDecode(arr, MessageType));
 }
 if (import.meta.main) {
     const inputfilenames = [
@@ -57,13 +68,8 @@ if (import.meta.main) {
         });
         const decodedData = await decodeAvroFile(inputfilename);
 
-        await Promise.all(decodedData.messages.map(async (arr) => {
-            const newLocal_1 = decodedData.dictionary.get(arr);
-
-            if (typeof newLocal_1 === "undefined") {
-                throw new Error("undefined");
-            }
-            await fsfile.write(newLocal_1);
+        await Promise.all(decodedData.map(async (arr) => {
+            await fsfile.write(arr);
         }));
     }
 }
