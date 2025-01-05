@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
 import { EncodedMessageBigInt } from "./EncodedMessageBigInt.ts";
-import { gzipDecompress } from "./gzipDecompress.ts";
+import { gzipDeCompress } from "./gzipDecompress.ts";
 
 import { bufferToUint8Array } from "./bufferToUint8Array.ts";
 import { EncodedDecodeMessageType } from "./EncodedDecodeMessageType.ts";
@@ -15,7 +15,7 @@ export async function decodeAvroToEncodedArrayOfMessages(
     data: Uint8Array,
 ): Promise<Uint8Array[]> {
     // Step 1: Decompress the input Uint8Array
-    const decompressedData = await gzipDecompress(data);
+    const decompressedData = await gzipDeCompress(data);
     const buf = Buffer.from(decompressedData);
 
     // Step 2: Parse the decompressed data to get EncodedArrayOfMessageAvro
@@ -27,7 +27,7 @@ export async function decodeAvroToEncodedArrayOfMessages(
 
     // Step 4: Decompress each element in the EncodedArrayOfMessageAvro
     for (const compressedData of aom.data) {
-        const decompressedElement = await gzipDecompress(
+        const decompressedElement = await gzipDeCompress(
             bufferToUint8Array(compressedData),
         );
         // console.log("decompressing", decompressedElement.length);
@@ -38,7 +38,7 @@ export async function decodeAvroToEncodedArrayOfMessages(
     console.log(aom);
     const sha512 = calculateSHA512(decodedDataArray);
     if (sha512 != aom.sha512) {
-        throw new Error("sha512 mismatch");
+        throw new Error("sha512 mismatch:" + sha512);
     }
     return decodedDataArray;
 }

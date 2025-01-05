@@ -4,6 +4,8 @@
         "singleQuote": false
     },
     "imports": {
+        "stream": "node:stream",
+        "zlib": "node:zlib",
         "@std/io": "jsr:@std/io@^0.225.0"
     }
 }
