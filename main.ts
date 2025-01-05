@@ -101,7 +101,7 @@ async function main(inputfilename: string, outputfilename: string) {
                 const line of splitUint8ArrayIntoChunks(c, MAXLINELENGTH)
             ) {
                 if (line.length !== 0) {
-                    console.log("读取到第" + count + "次");
+                    // console.log("读取到第" + count + "次");
                     // console.log(line);
                     // rawsize += BigInt(line.length);
                     const newLocal_1 = handleline(
@@ -186,7 +186,7 @@ async function saveEncodedMessagesAsAvro(
             ),
             messages: data.messages.map((a) => Number(a.toString())),
         } satisfies EncodedMessageAvro;
-        console.log(em);
+        // console.log(em);
         const buf = MessageType.toBuffer(em);
 
         const newLocal_3 = bufferToUint8Array(buf);
