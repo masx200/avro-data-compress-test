@@ -2,9 +2,9 @@ import { Buffer } from "node:buffer";
 import { EncodedMessageBigInt } from "./EncodedMessageBigInt.ts";
 import { gzipDecompress } from "./gzipDecompress.ts";
 
-import { EncodedMessageLong } from "./EncodedMessageLong.ts";
-import { parseEncodedMessageSchema } from "./parseEncodedMessageSchema.ts";
 import { bufferToUint8Array } from "./bufferToUint8Array.ts";
+import { EncodedMessageAvro } from "./EncodedMessageAvro.ts";
+import { parseEncodedMessageSchema } from "./parseEncodedMessageSchema.ts";
 
 async function decodeAvroFile(filePath: string): Promise<EncodedMessageBigInt> {
     // 定义Long类型的处理方式
@@ -15,7 +15,7 @@ async function decodeAvroFile(filePath: string): Promise<EncodedMessageBigInt> {
     const buf = Buffer.from(await gzipDecompress(newLocal));
 
     // 将AVRO二进制数据解析为JavaScript对象
-    const decodedMessage: EncodedMessageLong = MessageType.fromBuffer(buf);
+    const decodedMessage: EncodedMessageAvro = MessageType.fromBuffer(buf);
     console.log(decodedMessage);
     // 将Map<Long, string>转换为Map<bigint, string>
     const dictionary = new Map<bigint, Uint8Array>();
@@ -25,7 +25,7 @@ async function decodeAvroFile(filePath: string): Promise<EncodedMessageBigInt> {
 
     // 将Long[][]转换为bigint[][]
     const messages = decodedMessage.messages.map((arr) =>
-        arr.map((a) => BigInt(a.toString()))
+        BigInt(arr.toString())
     );
 
     return {
@@ -59,21 +59,18 @@ if (import.meta.main) {
         const decodedData = await decodeAvroFile(inputfilename);
         // console.log(decodedData);
         // const newLocal_1 =
-        await Promise.all(decodedData.messages.map((arr) => {
-            return (
-                arr.map((a) => decodedData.dictionary.get(a)).map(
-                    async (a) => {
-                        if (a === undefined) {
-                            throw new Error("undefined");
-                        }
-                        await fsfile.write(a);
-                    },
-                )
-                // .join(
-                //     "",
-                // )
-            );
-        })); //.join("\n");
+        await Promise.all(decodedData.messages.map(async (arr) => {
+            const newLocal_1 = decodedData.dictionary.get(arr);
+
+            if (newLocal_1 === undefined) {
+                throw new Error("undefined");
+            }
+            await fsfile.write(newLocal_1);
+        }) // .join(
+            //     "",
+            // )
+        );
+        // })); //.join("\n");
         // decodedData.messages.map((arr) => {
         //     console.log(
         //         arr.map((a) => decodedData.dictionary.get(a)).join(" "),

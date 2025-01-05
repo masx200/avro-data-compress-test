@@ -50,10 +50,7 @@ export const MessageSchema = {
             "name": "messages",
             "type": {
                 "type": "array",
-                "items": {
-                    "type": "array",
-                    "items": "int",
-                },
+                "items": "int",
             },
         },
     ],

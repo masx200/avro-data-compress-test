@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 
-export interface EncodedMessageLong {
+export interface EncodedMessageAvro {
     dictionary: Buffer<Uint8Array>[];
-    messages: number[][];
+    messages: number[];
 }
 // //import Long from "long";
