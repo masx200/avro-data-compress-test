@@ -84,8 +84,8 @@ async function main(inputfilename: string, outputfilename: string) {
     const MessageType = parseEncodedMessageSchema();
 
     const content = await Deno.readFile(inputfilename);
-    const MAXLINELENGTH = 1024;
-    const MAXCHUNCKLENGTH = 1024 * 1024;
+    const MAXLINELENGTH = 2048;
+    const MAXCHUNCKLENGTH = 2048 * 2048;
     const dataarray: Uint8Array[] = splitUint8ArrayIntoChunks(
         content,
         MAXCHUNCKLENGTH,
