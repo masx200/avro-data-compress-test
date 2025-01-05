@@ -87,7 +87,7 @@ async function main(inputfilename: string, outputfilename: string) {
         content,
         MAXCHUNCKLENGTH,
     ).map(
-        (c) => {
+        function (c) {
             const counter = new Map<string, bigint>();
             const dictionary = new Map<bigint, Uint8Array>();
             dictionary.set(0n, new Uint8Array());
@@ -97,9 +97,7 @@ async function main(inputfilename: string, outputfilename: string) {
             // let rawsize = 0n;
             const messages: bigint[][] = [];
             let count = 0;
-            for (
-                const line of splitUint8ArrayIntoChunks(c, MAXLINELENGTH)
-            ) {
+            for (const line of splitUint8ArrayIntoChunks(c, MAXLINELENGTH)) {
                 if (line.length !== 0) {
                     // console.log("读取到第" + count + "次");
                     // console.log(line);
@@ -121,14 +119,13 @@ async function main(inputfilename: string, outputfilename: string) {
                     //     result: newLocal_1,
                     //     line: newLocal_1.map((a) => {
                     //         const newLocal_3 = (decode.get(a)) as string;
-
                     //         return newLocal_3;
                     //     }).join(""),
                     // });
                     count++;
                 } /* else {
-                // messages.push([]);
-            } */
+        // messages.push([]);
+    } */
             }
             const data: EncodedMessageBigInt = {
                 dictionary: dictionary,
