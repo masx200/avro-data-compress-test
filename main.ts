@@ -82,7 +82,7 @@ async function main(inputfilename: string, outputfilename: string) {
 
     const content = await Deno.readFile(inputfilename);
     const MAXLINELENGTH = 1024; //32; //64; //128; //256; //512; //1024;
-    const MAXCHUNCKLENGTH = 1024 * 2675;
+    const MAXCHUNCKLENGTH = 1024 * 1337;
     const dataarray: Uint8Array[] = splitUint8ArrayIntoChunks(
         content,
         MAXCHUNCKLENGTH,
@@ -236,7 +236,7 @@ export function NestedCompressedPacketsEncode(
 ): Uint8Array {
     const d = encodeUint8ArrayToMessages(p, MAXLINELENGTH);
     d.haveAvroData = haveAvroData;
-    console.log(d);
+    // console.log(d);
     const b = encodeToAvroBuffer(d, MessageType);
     if (b.length < p.length) {
         return NestedCompressedPacketsEncode(
