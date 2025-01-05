@@ -8,13 +8,13 @@ import { parseEncodedMessageSchema } from "./parseEncodedMessageSchema.ts";
 import { uint8ArrayToHex } from "./uint8ArrayToHex.ts";
 
 import { Buffer } from "node:buffer";
+import path from "node:path";
 import { calculateSHA512 } from "./calculateSHA512.ts";
 import {
     EncodedArrayOfMessageAvro,
     parseArrayOfMessageSchema,
 } from "./parseArrayOfMessageSchema.ts";
 import { splitUint8ArrayIntoChunks } from "./splitUint8ArrayIntoChunks.ts";
-import path from "node:path";
 function handleline(
     options: {
         dictionary: Map<bigint, Uint8Array>;
@@ -86,8 +86,8 @@ async function main(inputfilename: string, outputfilename: string) {
     const MessageType = parseEncodedMessageSchema();
 
     const content = await Deno.readFile(inputfilename);
-    const MAXLINELENGTH = 2048;
-    const MAXCHUNCKLENGTH = 2048 * 2048;
+    const MAXLINELENGTH = 1536;
+    const MAXCHUNCKLENGTH = 1536 * 1536;
     const dataarray: Uint8Array[] = splitUint8ArrayIntoChunks(
         content,
         MAXCHUNCKLENGTH,
