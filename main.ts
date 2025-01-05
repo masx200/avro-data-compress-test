@@ -194,13 +194,16 @@ export function encodeToAvroBuffer(
     data: EncodedMessageBigInt,
     MessageType: EncodedDecodeMessageType,
 ): Uint8Array {
+    const newLocal_5 = Uint32Array.from(
+        data.messages.map((a) => Number(a.toString())),
+    );
     const em: EncodedMessageAvro = {
         sha512: data.sha512,
         haveAvroData: data.haveAvroData,
         dictionary: ObjectToArray(
             Array.from(data.dictionary),
         ),
-        messages: data.messages.map((a) => Number(a.toString())),
+        messages: Buffer.from(newLocal_5.buffer),
     } satisfies EncodedMessageAvro;
     console.log(em);
     const buf = MessageType.toBuffer(em);
@@ -227,6 +230,7 @@ export function NestedCompressedPacketsEncode(
     //console.log(d);
     const b = encodeToAvroBuffer(d, MessageType);
     if (b.length < p.length) {
+        console.log("compressed success", p.length, b.length);
         return NestedCompressedPacketsEncode(
             b,
             MAXLINELENGTH,
@@ -234,5 +238,6 @@ export function NestedCompressedPacketsEncode(
             haveAvroData + 1,
         );
     }
+    console.log("compressed failure", p.length, b.length);
     return p;
 }

@@ -22,9 +22,6 @@ export const MessageSchema = {
         },
     }, {
         "name": "messages",
-        "type": {
-            "type": "array",
-            "items": "int",
-        },
+        "type": "bytes",
     }],
 };

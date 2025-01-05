@@ -2,7 +2,7 @@ import { Buffer } from "node:buffer";
 
 export interface EncodedMessageAvro {
     dictionary: Buffer<Uint8Array>[];
-    messages: number[];
+    messages: Buffer<Uint8Array>;
     haveAvroData: number;
     sha512: string;
 }

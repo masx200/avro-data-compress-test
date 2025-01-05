@@ -124,7 +124,10 @@ function decodeToAvroBuffer(
         dictionary.set(BigInt(key.toString()), bufferToUint8Array(value));
     }
 
-    const messages = a.messages.map((arr) => BigInt(arr.toString()));
+    const newLocal_1 = new Uint32Array(bufferToUint8Array(a.messages).buffer);
+    const messages = Array.from(newLocal_1).map((arr) =>
+        BigInt(arr.toString())
+    );
 
     return {
         sha512: a.sha512,
