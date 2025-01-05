@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import { EncodedMessageBigInt } from "./EncodedMessageBigInt.ts";
+
 import { gzipDeCompress } from "./gzipDecompress.ts";
 
 import { bufferToUint8Array } from "./bufferToUint8Array.ts";
@@ -94,7 +94,7 @@ export function CompressedPacketsDecode(
     p: Uint8Array,
     MessageType: EncodedDecodeMessageType,
 ): Uint8Array {
-    const b: EncodedMessageBigInt = decodeToAvroBuffer(p, MessageType);
+    const b: EncodedMessageAvro = decodeToAvroBuffer(p, MessageType);
     const d: Uint8Array = decodeUint8ArrayToMessages(b);
     const sha512 = calculateSHA512([d]);
     if (sha512 != b.sha512) {
@@ -116,30 +116,36 @@ export function CompressedPacketsDecode(
 function decodeToAvroBuffer(
     p: Uint8Array,
     MessageType: EncodedDecodeMessageType,
-): EncodedMessageBigInt {
+): EncodedMessageAvro {
     const a: EncodedMessageAvro = MessageType.fromBuffer(Buffer.from(p));
     console.log(a);
-    const dictionary = new Map<bigint, Uint8Array>();
-    for (const [key, value] of Object.entries(a.dictionary)) {
-        dictionary.set(BigInt(key.toString()), bufferToUint8Array(value));
-    }
 
-    const newLocal_1 = new Uint32Array(bufferToUint8Array(a.messages).buffer);
-    const messages = Array.from(newLocal_1).map((arr) =>
-        BigInt(arr.toString())
-    );
-
+    //const newLocal_1 = new Uint32Array(bufferToUint8Array(a.messages).buffer);
+    // const messages = Array.from(newLocal_1).map((arr) =>
+    //     BigInt(arr.toString())
+    // );
+    const { messages, dictionary } = a;
     return {
         sha512: a.sha512,
         // haveAvroData: a.haveAvroData,
         dictionary,
         messages,
-    } satisfies EncodedMessageBigInt;
+    } satisfies EncodedMessageAvro;
 }
-function decodeUint8ArrayToMessages(b: EncodedMessageBigInt): Uint8Array {
+function decodeUint8ArrayToMessages(b: EncodedMessageAvro): Uint8Array {
+    const dictionary = new Map<bigint, Uint8Array>();
+    for (const [key, value] of Object.entries(b.dictionary)) {
+        dictionary.set(BigInt(key.toString()), bufferToUint8Array(value));
+    }
+    let messages = b.messages;
+    while (!Array.isArray(messages)) {
+        const buf = decodeUint8ArrayToMessages(messages);
+        messages = Array.from(new Uint32Array(buf.buffer));
+    }
     return Uint8Array.from(
-        b.messages.map((a) => {
-            const newLocal_2 = b.dictionary.get(a);
+        messages.map((a) => {
+            const c = BigInt(a.toString());
+            const newLocal_2 = dictionary.get(c);
             if (typeof newLocal_2 === "undefined") {
                 throw new Error("undefined");
             }

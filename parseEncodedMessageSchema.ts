@@ -1,8 +1,8 @@
 export function parseEncodedMessageSchema(): EncodedDecodeMessageType {
-    const MessageType = avro.parse(MessageSchema, {});
+    const MessageType = avro.parse(JSON.stringify(MessageSchema), {});
     return MessageType;
 }
-import avro from "avro-js";
+import avro from "avsc";
 
 import { EncodedDecodeMessageType } from "./EncodedDecodeMessageType.ts";
 export const MessageSchema = {
@@ -22,6 +22,9 @@ export const MessageSchema = {
         },
     }, {
         "name": "messages",
-        "type": "bytes",
+        "type": [{
+            "type": "array",
+            "items": "int",
+        }, "EncodedMessage"],
     }],
 };

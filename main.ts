@@ -1,7 +1,7 @@
 import { bufferToUint8Array } from "./bufferToUint8Array.ts";
 import { EncodedDecodeMessageType } from "./EncodedDecodeMessageType.ts";
 import { EncodedMessageAvro } from "./EncodedMessageAvro.ts";
-import { EncodedMessageBigInt } from "./EncodedMessageBigInt.ts";
+
 import { gzipCompress } from "./gzipCompress.ts";
 import { ObjectToArray } from "./ObjectToArray.ts";
 import { parseEncodedMessageSchema } from "./parseEncodedMessageSchema.ts";
@@ -155,7 +155,7 @@ async function saveEncodedMessagesAsAvro(
 export function encodeUint8ArrayToMessages(
     c: Uint8Array,
     MAXLINELENGTH: number,
-): EncodedMessageBigInt {
+): EncodedMessageAvro {
     const sha512 = calculateSHA512([c]);
     const counter = new Map<string, bigint>();
     const dictionary = new Map<bigint, Uint8Array>();
@@ -182,31 +182,29 @@ export function encodeUint8ArrayToMessages(
         }
     }
 
-    const data: EncodedMessageBigInt = {
+    const data: EncodedMessageAvro = {
         sha512: sha512,
         // haveAvroData: false,
-        dictionary: dictionary,
-        messages: messages.flat(),
-    } satisfies EncodedMessageBigInt;
+        dictionary: ObjectToArray(
+            Array.from(dictionary),
+        ),
+        messages: Array.from(messages.flat()).map((a) => Number(a.toString())),
+    } satisfies EncodedMessageAvro;
     return data;
 }
 export function encodeToAvroBuffer(
-    data: EncodedMessageBigInt,
+    data: EncodedMessageAvro,
     MessageType: EncodedDecodeMessageType,
     // MAXLINELENGTH: number,
     // haveAvroData: number,
 ): Uint8Array {
     // data.haveAvroData = haveAvroData;
-    const newLocal_5 = Uint32Array.from(
-        data.messages.map((a) => Number(a.toString())),
-    );
+
     const em: EncodedMessageAvro = {
         sha512: data.sha512,
         // haveAvroData: data.haveAvroData,
-        dictionary: ObjectToArray(
-            Array.from(data.dictionary),
-        ),
-        messages: Buffer.from(newLocal_5.buffer),
+        dictionary: data.dictionary,
+        messages: data.messages, //Buffer.from(newLocal_5.buffer),
     } satisfies EncodedMessageAvro;
     // em = encodeToAvroMessage(em, MessageType, MAXLINELENGTH);
     console.log(em);

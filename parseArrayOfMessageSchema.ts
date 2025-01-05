@@ -7,11 +7,11 @@ export interface EncodedDecodeArrayOfMessageType {
     fromBuffer(buf: Buffer<Uint8Array>): EncodedArrayOfMessageAvro;
     toBuffer(em: EncodedArrayOfMessageAvro): Buffer<Uint8Array>;
 }
-import avro from "avro-js";
+import avro from "avsc";
 import { Buffer } from "node:buffer";
 
 export function parseArrayOfMessageSchema(): EncodedDecodeArrayOfMessageType {
-    const MessageType = avro.parse(ArrayOfMessageSchema, {});
+    const MessageType = avro.parse(JSON.stringify(ArrayOfMessageSchema), {});
     return MessageType;
 }
 
